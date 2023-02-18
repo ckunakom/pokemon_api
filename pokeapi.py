@@ -1,8 +1,7 @@
 from typing import Optional
 from fastapi import FastAPI, Path, HTTPException, status
 from pydantic import BaseModel
-from database import get_poke_by_name, get_poke_by_type, 
-                     add_poke_to_db, update_poke, delete_poke
+from database import get_poke_by_name, get_poke_by_type, add_poke_to_db, update_poke, delete_poke
 
 app = FastAPI()
 @app.get("/")
@@ -74,19 +73,51 @@ class Pokemon(BaseModel):
     is_legendary: bool
 
 # use class in requests
+## POST
 @app.post("/newPoke/{pokemon_name}")
 def create_pokemon(pokemon_name: str, pokemon: Pokemon):
     if get_poke_by_name(pokemon_name):
         raise HTTPException(
               status_code=status.HTTP_406_NOT_ACCEPTABLE, 
               detail="Pokemon already exists") 
-   add_poke_to_db(pokemon.name, pokemon.primary_type, 
+    add_poke_to_db(pokemon.name, pokemon.primary_type, 
                    pokemon.secondary_type,
                    pokemon.sum_stats, pokemon.hit_points,
                    pokemon.attack_strength,
                    pokemon.special_attack_strength,
                    pokemon.defensive_strength,
-                   pokemon.special_defensive_strength)
-   raise HTTPException(
-         status_code=status.HTTP_201_CREATED,  
-         detail="Pokemon created successfully")
+                   pokemon.special_defensive_strength,
+                   pokemon.speed_strength,
+                   pokemon.generation_type,
+                   pokemon.is_legendary)
+    raise HTTPException(status_code=status.HTTP_201_CREATED,  
+        detail="Pokemon created successfully")
+
+## UPDATE
+@app.put("/updatePoke/{pokemon_name}")
+def update_pokemon(pokemon_name: str, pokemon: Pokemon):
+    if not get_poke_by_name(pokemon_name):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                           detail="Pokemon not found")
+    update_poke(pokemon.name, pokemon.primary_type,
+                pokemon.secondary_type,
+                pokemon.sum_stats, pokemon.hit_points,
+                pokemon.attack_strength,
+                pokemon.special_attack_strength,
+                pokemon.defensive_strength,
+                pokemon.special_defensive_strength,
+                pokemon.speed_strength,
+                pokemon.generation_type,
+                pokemon.is_legendary)
+    raise HTTPException(status_code=status.HTTP_200_OK,
+                        detail="Pokemon details updated")
+
+## DELETE
+@app.delete("/deletePoke/{pokemon_name}")
+def delete_pokemon(pokemon_name: str):
+    if not get_poke_by_name(pokemon_name):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Pokemon not found")
+    delete_poke(pokemon_name)
+    raise HTTPException(status_code=status.HTTP_200_OK,
+                        detail="Pokemon deleted successfully")

@@ -33,10 +33,10 @@ def load_csv_to_db():
 
 # Table exists or not
 def table_exists(cursor):
-    c.execute('''
+    cursor.execute('''
         SELECT count(name) FROM sqlite_master WHERE type='table' AND
         name='Pokemons' ''')
-    if not c.fetchone()[0]:
+    if not cursor.fetchone()[0]:
         return False
     return True
 
@@ -46,7 +46,7 @@ def get_poke_by_name(poke_name):
     poke_name = poke_name.capitalize()
     conn = sqlite3.connect(DB_FILENAME)
     c = conn.cursor()
-     if not table_exists(c):
+    if not table_exists(c):
         load_csv_to_db()
     c.execute('''SELECT * FROM Pokemons WHERE name = ?''', 
                     (poke_name,))
@@ -95,29 +95,29 @@ def update_poke(name, type1=None, type2=None, sum_stats=None,
                 hp=None, attack=None, special_attack=None, 
                 defense=None, special_defense=None,
                 speed=None, generation=None, is_legend=None):
-     conn = sqlite3.connect(DB_FILENAME)
-     c = conn.cursor()
-     if not table_exists(c):
+    conn = sqlite3.connect(DB_FILENAME)
+    c = conn.cursor()
+    if not table_exists(c):
         load_csv_to_db()
-     params = [type1, type2, sum_stats, hp, attack, special_attack,
+    params = [type1, type2, sum_stats, hp, attack, special_attack,
               defense, special_defense, speed, generation, is_legend]
-     params_names = ['type1', 'type2', 'sum_stats', 'hp', 'attack',
+    params_names = ['type1', 'type2', 'sum_stats', 'hp', 'attack',
                     'special_attack', 'defense', 'special_defense',
                     'speed', 'generation', 'is_legend']
-     for param, param_name in zip(params, params_names):
+    for param, param_name in zip(params, params_names):
         if param:
             query = '''
                     UPDATE Pokemons SET ''' + param_name + '''    
                     = ? WHERE name = ?''' 
             c.execute(query, (param, name))
-     conn.commit()
+    conn.commit()
 
 # deleting pokemon
 def delete_poke(name):
     conn = sqlite3.connect(DB_FILENAME)
     c = conn.cursor()
-     if not table_exists(c):
+    if not table_exists(c):
         load_csv_to_db()
-     c.execute('''DELETE FROM Pokemons WHERE name = ?''',  
+    c.execute('''DELETE FROM Pokemons WHERE name = ?''',  
                        (name,))
-     conn.commit()
+    conn.commit()
